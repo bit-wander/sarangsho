@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, create_engine, Session
 from app.core.config import settings
 from app.models.user import User 
 from app.models.book import Book
+from app.models.review import Review
 
 engine = create_engine(settings.DATABASE_URL, echo=True) 
 

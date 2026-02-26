@@ -20,3 +20,4 @@ class User(SQLModel, table=True):
 
     # Relationships
     books: List["Book"] = Relationship(back_populates="user")
+    reviews: List["Review"] = Relationship(back_populates="user")

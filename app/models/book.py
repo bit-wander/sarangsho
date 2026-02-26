@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship 
 from datetime import datetime, timezone  
-from typing import Optional 
+from typing import Optional, List
 from sqlalchemy import DateTime
 
 def get_datetime_utc() -> datetime: 
@@ -24,4 +24,5 @@ class Book(SQLModel, table=True):
 
     # Relationships
     user: Optional["User"] = Relationship(back_populates="books") 
+    reviews: List["Review"] = Relationship(back_populates="book")
     

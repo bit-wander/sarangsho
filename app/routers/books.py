@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status 
-from sqlmodel import Session, select 
+from sqlmodel import Session, select, func
 from app.db.database import get_session 
 from app.models.book import Book 
 from app.schemas.book import BookCreate, BookUpdate, BookResponse 
+from app.models.review import Review
 from typing import List, Optional
 from fastapi import Query
 from app.core.dependencies import get_current_admin
 from app.models.user import User
+
 
 router = APIRouter(prefix="/books", tags=["Books"]) 
 
@@ -85,3 +87,12 @@ def delete_book(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found") 
     session.delete(book) 
     session.commit() 
+
+@router.get("/{book_id}/rating")
+def get_book_average_rating(book_id: int, session: Session = Depends(get_session)):
+    statement = select(func.avg(Review.rating)).where(Review.book_id == book_id)
+    average_rating = session.exec(statement).first()
+    return {
+        "book_id": book_id,
+        "average_rating": round(average_rating, 2) if average_rating else 0
+        }

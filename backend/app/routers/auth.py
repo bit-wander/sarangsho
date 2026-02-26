@@ -6,12 +6,17 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin
 from app.utils.security import hash_password, verify_password 
 from app.utils.jwt import create_access_token 
+from sqlalchemy import or_
 
 router = APIRouter(prefix="/auth", tags=["Authentication"]) 
 
 @router.post("/register") 
 def register(user: UserCreate, session: Session = Depends(get_session)): 
-    statement = select(User).where(User.email == user.email)
+    statement = select(User).where(or_(
+        User.email == user.email,
+        User.username == user.username
+    ))
+
     existing_user = session.exec(statement).first() 
 
     if existing_user: 

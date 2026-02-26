@@ -6,6 +6,7 @@ from app.schemas.book import BookCreate, BookUpdate, BookResponse
 from app.models.review import Review
 from typing import List, Optional
 from fastapi import Query
+from sqlalchemy import or_
 from app.core.dependencies import get_current_admin
 from app.models.user import User
 
@@ -32,13 +33,53 @@ def read_books(
     session: Session = Depends(get_session),
     skip:int = 0,
     limit:int = Query(default=10, le=100),
-    genre:Optional[str] = None
-) -> List[Book]: 
-    statement = select(Book) 
+    search: Optional[str] = None,
+    genre:Optional[str] = None,
+    sort_by_rating: bool = False
+):
+
+    statement = (
+        select(
+            Book,
+            func.avg(Review.rating).label("average_rating")
+            )
+        .outerjoin(Review)
+        .group_by(Book.id)
+        .order_by(func.avg(Review.rating).desc() if sort_by_rating else Book.id) 
+    ) 
+
+    # Search by title, author, or description
+    if search:
+        search_term = f"%{search}%" 
+        statement = statement.where(
+            or_(
+                Book.title.ilike(search_term),
+                Book.author.ilike(search_term),
+                Book.description.ilike(search_term),
+            )
+        )
+
+    # Filter by genre
     if genre: 
         statement = statement.where(Book.genre == genre) 
+
+    # Sort by rating if sort_by_rating is True
+    if sort_by_rating:
+        statement = statement.order_by(func.avg(Review.rating).desc())
+    else:
+        statement = statement.order_by(Book.created_at.desc())
+
     books = session.exec(statement.offset(skip).limit(limit)).all() 
-    return books 
+
+    books = [
+        BookResponse(
+            **book.model_dump(),
+            average_rating=rating
+        )
+        for book, rating in books
+    ]
+
+    return books
 
 
 # Get a single book by ID 

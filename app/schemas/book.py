@@ -21,6 +21,7 @@ class BookUpdate(BookBase):
 class BookResponse(BookBase): 
     id: int 
     created_at: datetime 
+    average_rating: Optional[float] = None 
 
     class Config: 
         from_attributes = True 

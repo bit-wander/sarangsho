@@ -5,6 +5,8 @@ from app.models.book import Book
 from app.schemas.book import BookCreate, BookUpdate, BookResponse 
 from typing import List, Optional
 from fastapi import Query
+from app.core.dependencies import get_current_admin
+from app.models.user import User
 
 router = APIRouter(prefix="/books", tags=["Books"]) 
 
@@ -13,7 +15,8 @@ router = APIRouter(prefix="/books", tags=["Books"])
 @router.post("/", response_model=BookResponse, status_code=status.HTTP_201_CREATED) 
 def create_book(
     book: BookCreate, 
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin)
 ) -> Book: 
     db_book = Book(**book.dict()) 
     session.add(db_book) 
@@ -53,7 +56,8 @@ def read_book(
 def update_book(
     book_id: int, 
     book: BookUpdate, 
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin)
 ) -> Book: 
     db_book = session.get(Book, book_id) 
     if not db_book: 
@@ -73,7 +77,8 @@ def update_book(
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT) 
 def delete_book(
     book_id: int, 
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin)
 ) -> None: 
     book = session.get(Book, book_id) 
     if not book: 

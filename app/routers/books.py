@@ -9,10 +9,12 @@ from fastapi import Query
 from sqlalchemy import or_
 from app.core.dependencies import get_current_admin
 from app.models.user import User
-
+from app.utils.file_upload import save_cover_image
+from fastapi import File, UploadFile
+import os
 
 router = APIRouter(prefix="/books", tags=["Books"]) 
-
+UPLOAD_DIR = "uploads/covers"
 
 # Create a new book 
 @router.post("/", response_model=BookResponse, status_code=status.HTTP_201_CREATED) 
@@ -137,3 +139,28 @@ def get_book_average_rating(book_id: int, session: Session = Depends(get_session
         "book_id": book_id,
         "average_rating": round(average_rating, 2) if average_rating else 0
         }
+
+@router.post("/{book_id}/upload-cover")
+def upload_book_cover(
+    book_id: int,
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin)
+) -> str:
+
+    book = session.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+
+    if book.cover_image:
+        old_cover_path = book.cover_image.replace("/uploads/covers/", "")
+        old_cover_path = os.path.join(UPLOAD_DIR, old_cover_path)
+        if os.path.exists(old_cover_path):
+            os.remove(old_cover_path)
+    
+    cover_path = save_cover_image(file)
+    book.cover_image = cover_path
+    session.add(book)
+    session.commit()
+    session.refresh(book)
+    return cover_path

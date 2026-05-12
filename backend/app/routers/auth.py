@@ -40,6 +40,10 @@ def login(
     statement = select(User).where(User.email == form_data.username) 
     existing_user = session.exec(statement).first() 
 
+    print(form_data.password)
+    print("hello")
+    
+
     if not existing_user or not verify_password(form_data.password, existing_user.password_hash): 
         raise HTTPException(status_code=401, detail="Invalid credentials") 
     

@@ -1,0 +1,8 @@
+{
+  "name": "Sarangsho",
+  "description": "An interactive personal digital library, reading progress tracker, Pomodoro focus timer, and AI reading assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

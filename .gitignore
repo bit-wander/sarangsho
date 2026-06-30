@@ -1,5 +1,42 @@
-.venv/
-__init__.py 
-__pycache__/ 
-.env 
+# Backend / Python Ignores
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/.env
+backend/uv.lock
 
+# Frontend / Node Ignores
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Root level / Global Ignores
+.venv/
+__pycache__/
+__init__.py
+.env
+.DS_Store
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml
+
+# Uploads
+uploads/
+
+# Datasets
+RokomariBG_Dataset/
+
+# Documentation / PDFs
+*.pdf
+
+# Archives & Backups
+*.zip
+*.dump
+sarangsho_with_admin/
+
+# API spec (generated)
+openapi.json
